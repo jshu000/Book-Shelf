@@ -1,8 +1,10 @@
 package com.example.dailyrounds_project4
 
+import android.content.Intent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -17,8 +19,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.example.dailyrounds_project4.R
+import com.example.dailyrounds_project4.navigation.Screens
 import com.example.dailyrounds_project4.presentation.login_screen.SignInViewModel
+import com.example.dailyrounds_project4.presentation.signup_screen.SignUpScreen
 import com.example.dailyrounds_project4.presentation.signup_screen.SignUpViewModel
 import com.example.dailyrounds_project4.ui.theme.RegularFont
 import com.example.dailyrounds_project4.ui.theme.lightBlue
@@ -30,6 +35,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun SignInScreen(
+    navController: NavController,
     viewModel: SignInViewModel = hiltViewModel()
 ) {
 
@@ -120,13 +126,17 @@ fun SignInScreen(
             if (state.value?.isLoading == true) {
                 CircularProgressIndicator()
             }
-
         }
+
         Text(
-            text = "New User? Sign Up ",
+            text = "New User? Sign Up",
             fontWeight = FontWeight.Bold,
             color = Color.Black,
-            fontFamily = RegularFont
+            fontFamily = RegularFont,
+            modifier = Modifier
+                .clickable {
+                    navController.navigate(Screens.SignUpScreen.route)
+                }
         )
         Text(text = "or connect with", fontWeight = FontWeight.Medium, color = Color.Gray)
         Row(
@@ -149,17 +159,6 @@ fun SignInScreen(
                 Icon(
                     painter = painterResource(id = R.drawable.ic_google),
                     contentDescription = "Google Icon",
-                    modifier = Modifier.size(50.dp),
-                    tint = Color.Unspecified
-                )
-            }
-            Spacer(modifier = Modifier.width(20.dp))
-            IconButton(onClick = {
-
-            }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_facebook),
-                    contentDescription = "Facebook Icon",
                     modifier = Modifier.size(50.dp),
                     tint = Color.Unspecified
                 )

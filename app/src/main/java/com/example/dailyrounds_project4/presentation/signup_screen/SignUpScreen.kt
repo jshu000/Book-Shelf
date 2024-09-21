@@ -153,16 +153,7 @@ fun SignUpScreen(
                     contentDescription = "Google Icon", tint = Color.Unspecified
                 )
             }
-            Spacer(modifier = Modifier.width(20.dp))
-            IconButton(onClick = {
-
-            }) {
-                Icon(
-                    modifier = Modifier.size(52.dp),
-                    painter = painterResource(id = R.drawable.ic_facebook),
-                    contentDescription = "Google Icon", tint = Color.Unspecified
-                )
-            }
+            
 
         }
     }
