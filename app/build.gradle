@@ -18,6 +18,9 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary true
+        }
     }
 
     buildTypes {
@@ -38,6 +41,11 @@ android {
     }
     composeOptions {
         kotlinCompilerExtensionVersion '1.4.0'
+    }
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
     }
 }
 
@@ -69,4 +77,6 @@ dependencies {
     kapt "com.google.dagger:hilt-android-compiler:2.44"
     kapt 'androidx.hilt:hilt-compiler:1.0.0'
     implementation 'androidx.hilt:hilt-navigation-compose:1.0.0'
+    //Google auth dependency
+    implementation 'com.google.android.gms:play-services-auth:20.4.0'
 }
