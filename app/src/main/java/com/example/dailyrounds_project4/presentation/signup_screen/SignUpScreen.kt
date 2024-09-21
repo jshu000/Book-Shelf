@@ -3,8 +3,12 @@ package com.example.dailyrounds_project4.presentation.signup_screen
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -18,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.dailyrounds_project4.R
+import com.example.dailyrounds_project4.models.CountryItem
 import com.example.dailyrounds_project4.navigation.Screens
 import com.example.dailyrounds_project4.ui.theme.RegularFont
 import com.example.dailyrounds_project4.ui.theme.lightBlue
@@ -31,15 +36,24 @@ fun SignUpScreen(
 ) {
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
+    var passwordError by remember { mutableStateOf("") }
+    var selectedCountry by remember { mutableStateOf<CountryItem?>(null) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val state = viewModel.signUpState.collectAsState(initial = null)
+    val countries = viewModel.loadCountries(context = LocalContext.current)
+    var expanded by remember { mutableStateOf(false) }
 
+    fun isPasswordValid(password: String): Boolean {
+        val passwordPattern = Regex("^(?=.*[0-9])(?=.*[!@#$%^&*()])(?=.*[a-z])(?=.*[A-Z]).{8,}$")
+        return passwordPattern.matches(password)
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(start = 30.dp, end = 30.dp),
-        verticalArrangement = Arrangement.Center,
+            .padding(start = 30.dp, end = 30.dp)
+            .verticalScroll(rememberScrollState()),
+    verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -78,27 +92,81 @@ fun SignUpScreen(
         )
 
         Spacer(modifier = Modifier.height(16.dp))
+        // Password Input Field
         TextField(
             modifier = Modifier.fillMaxWidth(),
             value = password,
+            onValueChange = { newPassword ->
+                password = newPassword
+                if (passwordError.isNotEmpty()) {
+                    passwordError = "" // Clear error message while typing
+                }
+            },
             colors = TextFieldDefaults.textFieldColors(
                 backgroundColor = lightBlue,
                 cursorColor = Color.Black,
-                disabledLabelColor = lightBlue,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent
             ),
-            onValueChange = {
-                password = it
-            },
             shape = RoundedCornerShape(8.dp),
             singleLine = true,
             placeholder = {
                 Text(text = "Password")
             }
         )
+
+        // Show error message if validation fails
+        if (passwordError.isNotEmpty()) {
+            Text(
+                text = passwordError,
+                color = Color.Red,
+                style = MaterialTheme.typography.body2,
+                modifier = Modifier.padding(top = 4.dp) // Add padding for spacing
+            )
+        }
+
+        //country
+        Spacer(modifier = Modifier.height(16.dp))
+        // Dropdown Menu
+        Box(modifier = Modifier.fillMaxWidth()) {
+            TextField(
+                readOnly = true,
+                value = selectedCountry?.country ?: "Select a country",
+                onValueChange = {},
+                label = { Text("Country") },
+                trailingIcon = {
+                    IconButton(onClick = { expanded = !expanded }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowDropDown,
+                            contentDescription = "Dropdown Icon"
+                        )
+                    }
+                }
+            )
+
+            // Dropdown Menu
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                countries.forEach { country ->
+                    DropdownMenuItem(onClick = {
+                        selectedCountry = country
+                        expanded = false
+                    }) {
+                        Text(text = country.country)
+                    }
+                }
+            }
+        }
         Button(
             onClick = {
+                if (isPasswordValid(password)) {
+                    // Proceed with sign-up logic
+                    // Correct
+                } else {
+                    passwordError = "Password must be at least 8 characters long, include a number, a special character, a lowercase letter, and an uppercase letter."
+                }
                 scope.launch {
                     viewModel.registerUser(email, password)
                 }
@@ -153,7 +221,7 @@ fun SignUpScreen(
                     contentDescription = "Google Icon", tint = Color.Unspecified
                 )
             }
-            
+
 
         }
     }
