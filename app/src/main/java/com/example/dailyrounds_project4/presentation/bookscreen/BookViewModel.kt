@@ -16,29 +16,44 @@ import com.example.dailyrounds_project4.presentation.login_screen.SignInState
 import com.example.dailyrounds_project4.util.Resource
 import com.google.firebase.auth.AuthCredential
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import java.io.InputStream
 import javax.inject.Inject
-
 @HiltViewModel
 class BookViewModel @Inject constructor(
     private val repository: AuthRepository
 ) : ViewModel() {
 
-    fun booklist(context: Context): List<BooksItem> {
-        val booksList = mutableListOf<BooksItem>()
+    // MutableState to hold the books list
+    private val _booksList = mutableStateOf<List<BooksItem>>(emptyList())
+    val booksList: State<List<BooksItem>> = _booksList
+
+    // Function to load the book list
+    fun loadBookList(context: Context) {
         val booksAPI = RetrofitHelper.getInstance().create(BooksAPI::class.java)
-        GlobalScope.launch {
-            val result = booksAPI.getBooks()
-            if(result!=null){
-                Log.d("jashwant", "onCreate: result.body.tostring -"+result.body().toString())
-                val bookList =result.body()
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val result = async { booksAPI.getBooks() }.await()
+
+                if (result.isSuccessful && result.body() != null) {
+                    val bookList = result.body()!!
+                    Log.d("BookViewModel", "Books retrieved: $bookList")
+
+                    // Update the books list in the state
+                    _booksList.value = bookList
+                } else {
+                    Log.e("BookViewModel", "Error: ${result.errorBody()?.string() ?: "Unknown error"}")
+                }
+            } catch (e: Exception) {
+                Log.e("BookViewModel", "Exception occurred: ${e.message}")
             }
         }
-        return booksList
     }
 }

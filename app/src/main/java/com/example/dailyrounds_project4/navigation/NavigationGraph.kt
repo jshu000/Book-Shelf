@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.dailyrounds_project4.SignInScreen
+import com.example.dailyrounds_project4.presentation.bookscreen.BookScreen
 import com.example.dailyrounds_project4.presentation.signup_screen.SignUpScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 
@@ -15,7 +16,7 @@ fun NavigationGraph(
 ) {
     NavHost(
         navController = navController,               //The NavController is the central API for the Navigation component. It is stateful and keeps track of the back stack of composables that make up the screens in your app and the state of each screen.
-        startDestination = Screens.SignUpScreen.route
+        startDestination = Screens.BookScreen.route
     ) {
         composable(route = Screens.SignInScreen.route) {
             SignInScreen(navController)
@@ -23,6 +24,10 @@ fun NavigationGraph(
         }
         composable(route = Screens.SignUpScreen.route) {
             SignUpScreen(navController)
+
+        }
+        composable(route = Screens.BookScreen.route) {
+            BookScreen(navController)
 
         }
     }

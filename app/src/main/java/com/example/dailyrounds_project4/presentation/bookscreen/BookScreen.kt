@@ -1,9 +1,11 @@
 package com.example.dailyrounds_project4.presentation.bookscreen
 
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -29,196 +31,79 @@ import com.example.dailyrounds_project4.presentation.signup_screen.SignUpViewMod
 import com.example.dailyrounds_project4.ui.theme.RegularFont
 import com.example.dailyrounds_project4.ui.theme.lightBlue
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import coil.compose.rememberImagePainter
+import com.example.dailyrounds_project4.models.BooksItem
+import com.example.dailyrounds_project4.presentation.login_screen.SignInViewModel
 
 
 @Composable
-fun SignUpScreen(
+fun BookScreen(
     navController: NavController,
-    viewModel: SignUpViewModel = hiltViewModel()
+    viewModel: BookViewModel = hiltViewModel()
 ) {
-    var password by rememberSaveable { mutableStateOf("") }
-    var passwordError by remember { mutableStateOf("") }
-    var selectedCountry by remember { mutableStateOf<CountryItem?>(null) }
-    val scope = rememberCoroutineScope()
+    // Call loadBookList to fetch the books when the screen is loaded
     val context = LocalContext.current
-    val state = viewModel.signUpState.collectAsState(initial = null)
-    val countries = viewModel.loadCountries(context = LocalContext.current)
-    var expanded by remember { mutableStateOf(false) }
-
-    fun isPasswordValid(password: String): Boolean {
-        val passwordPattern = Regex("^(?=.*[0-9])(?=.*[!@#$%^&*()])(?=.*[a-z])(?=.*[A-Z]).{8,}$")
-        return passwordPattern.matches(password)
+    LaunchedEffect(Unit) {
+        viewModel.loadBookList(context)
     }
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(start = 30.dp, end = 30.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            modifier = Modifier.padding(bottom = 10.dp),
-            text = "Create Account",
-            fontWeight = FontWeight.Bold,
-            fontSize = 35.sp,
-            fontFamily = RegularFont,
-        )
-        Text(
-            text = "Enter your credential's to register",
-            fontWeight = FontWeight.Medium,
-            fontSize = 15.sp, color = Color.Gray,
-            fontFamily = RegularFont,
 
-            )
-        Spacer(modifier = Modifier.height(16.dp))
-        // Password Input Field
-        TextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = password,
-            onValueChange = { newPassword ->
-                password = newPassword
-                if (passwordError.isNotEmpty()) {
-                    passwordError = "" // Clear error message while typing
-                }
-            },
-            colors = TextFieldDefaults.textFieldColors(
-                backgroundColor = lightBlue,
-                cursorColor = Color.Black,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
-            ),
-            shape = RoundedCornerShape(8.dp),
-            singleLine = true,
-            placeholder = {
-                Text(text = "Password")
-            }
+    // Observe the booksList from the ViewModel
+    val books by viewModel.booksList
+
+    var selectedYear by remember { mutableStateOf(2022) }
+
+    val years = (2022 downTo 2010).toList()
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Top Bar
+        TopAppBar(
+            title = { Text("Book Shelf", fontSize = 24.sp, fontWeight = FontWeight.Bold) },
+            backgroundColor = Color(0xFF3F51B5),
+            contentColor = Color.White
         )
 
-        // Show error message if validation fails
-        if (passwordError.isNotEmpty()) {
-            Text(
-                text = passwordError,
-                color = Color.Red,
-                style = MaterialTheme.typography.body2,
-                modifier = Modifier.padding(top = 4.dp) // Add padding for spacing
-            )
-        }
-
-        //country
-        Spacer(modifier = Modifier.height(16.dp))
-        // Dropdown Menu
-        Box(modifier = Modifier.fillMaxWidth()) {
-            TextField(
-                readOnly = true,
-                value = selectedCountry?.country ?: "Select a country",
-                onValueChange = {},
-                label = { Text("Country") },
-                trailingIcon = {
-                    IconButton(onClick = { expanded = !expanded }) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowDropDown,
-                            contentDescription = "Dropdown Icon"
+        // Year Selector Tabs
+        ScrollableTabRow(
+            selectedTabIndex = years.indexOf(selectedYear),
+            backgroundColor = Color(0xFF3F51B5),
+            contentColor = Color.White,
+            edgePadding = 8.dp
+        ) {
+            years.forEach { year ->
+                Tab(
+                    selected = selectedYear == year,
+                    onClick = { selectedYear = year },
+                    text = {
+                        Text(
+                            text = year.toString(),
+                            color = if (selectedYear == year) Color.Black else Color.White
                         )
                     }
-                }
-            )
-
-            // Dropdown Menu
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                countries.forEach { country ->
-                    DropdownMenuItem(onClick = {
-                        selectedCountry = country
-                        expanded = false
-                    }) {
-                        Text(text = country.country)
-                    }
-                }
-            }
-        }
-        Button(
-            onClick = {
-                if (isPasswordValid(password)) {
-                    // Proceed with sign-up logic
-                    // Correct
-                } else {
-                    passwordError = "Password must be at least 8 characters long, include a number, a special character, a lowercase letter, and an uppercase letter."
-                }
-                scope.launch {
-                    //viewModel.registerUser(email, password)
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 20.dp, start = 30.dp, end = 30.dp),
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = Color.Black,
-                contentColor = Color.White
-            ),
-            shape = RoundedCornerShape(15.dp)
-        ) {
-            Text(
-                text = "Sign Up",
-                color = Color.White,
-                modifier = Modifier
-                    .padding(7.dp)
-            )
-        }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            if (state.value?.isLoading == true) {
-                CircularProgressIndicator()
-            }
-        }
-        Text(
-            modifier = Modifier
-                .padding(15.dp)
-                .clickable {
-                    navController.navigate(Screens.SignInScreen.route)
-                },
-            text = "Already Have an account? sign In",
-            fontWeight = FontWeight.Bold, color = Color.Black, fontFamily = RegularFont
-        )
-        Text(
-            modifier = Modifier
-                .padding(
-                    top = 40.dp,
-                ),
-            text = "Or connect with",
-            fontWeight = FontWeight.Medium, color = Color.Gray
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp), horizontalArrangement = Arrangement.Center
-        ) {
-            IconButton(onClick = { /*TODO*/ }) {
-                Icon(
-                    modifier = Modifier.size(50.dp),
-                    painter = painterResource(id = R.drawable.ic_google),
-                    contentDescription = "Google Icon", tint = Color.Unspecified
                 )
             }
-
-
         }
-    }
 
-    LaunchedEffect(key1 = state.value?.isSuccess) {
-        scope.launch {
-            if (state.value?.isSuccess?.isNotEmpty() == true) {
-                val success = state.value?.isSuccess
-                Toast.makeText(context, "$success", Toast.LENGTH_LONG).show()
-            }
-        }
-    }
-    LaunchedEffect(key1 = state.value?.isError) {
-        scope.launch {
-            if (state.value?.isError?.isNotBlank() == true) {
-                val error = state.value?.isError
-                Toast.makeText(context, "$error", Toast.LENGTH_LONG).show()
+        // Book List
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            items(books) {item ->
+                Log.d("jashwant", "BookScreen.kt: books-"+item)
             }
         }
     }
