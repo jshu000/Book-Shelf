@@ -48,63 +48,42 @@ import coil.compose.rememberImagePainter
 import com.example.dailyrounds_project4.models.BooksItem
 import com.example.dailyrounds_project4.presentation.login_screen.SignInViewModel
 
-
 @Composable
-fun BookScreen(
-    navController: NavController,
-    viewModel: BookViewModel = hiltViewModel()
+fun BookScreen(navController: NavController,
+               viewModel: BookViewModel = hiltViewModel()
 ) {
-    // Call loadBookList to fetch the books when the screen is loaded
+    // Observe the books list from the ViewModel
+    val booksList by viewModel.booksList
+
     val context = LocalContext.current
+    // Refresh the data when the screen is first displayed
     LaunchedEffect(Unit) {
         viewModel.loadBookList(context)
     }
 
-    // Observe the booksList from the ViewModel
-    val books by viewModel.booksList
-
-    var selectedYear by remember { mutableStateOf(2022) }
-
-    val years = (2022 downTo 2010).toList()
-
-    Column(modifier = Modifier.fillMaxSize()) {
-        // Top Bar
-        TopAppBar(
-            title = { Text("Book Shelf", fontSize = 24.sp, fontWeight = FontWeight.Bold) },
-            backgroundColor = Color(0xFF3F51B5),
-            contentColor = Color.White
-        )
-
-        // Year Selector Tabs
-        ScrollableTabRow(
-            selectedTabIndex = years.indexOf(selectedYear),
-            backgroundColor = Color(0xFF3F51B5),
-            contentColor = Color.White,
-            edgePadding = 8.dp
-        ) {
-            years.forEach { year ->
-                Tab(
-                    selected = selectedYear == year,
-                    onClick = { selectedYear = year },
-                    text = {
-                        Text(
-                            text = year.toString(),
-                            color = if (selectedYear == year) Color.Black else Color.White
-                        )
-                    }
-                )
-            }
+    // Display the list of books
+    LazyColumn {
+        items(booksList) { book ->
+            BookItem(book)
         }
+    }
+}
 
-        // Book List
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            items(books) {item ->
-                Log.d("jashwant", "BookScreen.kt: books-"+item)
-            }
+@Composable
+fun BookItem(book: BooksItem) {
+    Row(modifier = Modifier.padding(8.dp)) {
+        // Load image using Coil or similar library
+        Image(
+            painter = rememberImagePainter(book.image),
+            contentDescription = book.title,
+            modifier = Modifier.size(100.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Column {
+            Text(text = book.title, fontWeight = FontWeight.Bold)
+            Text(text = "Score: ${book.score}")
+            Text(text = "Popularity: ${book.popularity}")
+            Text(text = "Published: ${book.publishedChapterDate}") // Format this as needed
         }
     }
 }
