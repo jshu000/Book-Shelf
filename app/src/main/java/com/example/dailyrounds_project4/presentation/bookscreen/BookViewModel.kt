@@ -30,9 +30,17 @@ class BookViewModel @Inject constructor(
     private val repository: AuthRepository
 ) : ViewModel() {
 
-    // MutableState to hold the books list
+    // Full books list
     private val _booksList = mutableStateOf<List<BooksItem>>(emptyList())
     val booksList: State<List<BooksItem>> = _booksList
+
+    // Selected year for filtering
+    private val _selectedYear = mutableStateOf(2018) // Default year
+    val selectedYear: State<Int> = _selectedYear
+
+    // Filtered books list based on the selected year
+    private val _filteredBooksList = mutableStateOf<List<BooksItem>>(emptyList())
+    val filteredBooksList: State<List<BooksItem>> = _filteredBooksList
 
     // Function to load the book list
     fun loadBookList(context: Context) {
@@ -44,10 +52,13 @@ class BookViewModel @Inject constructor(
 
                 if (result.isSuccessful && result.body() != null) {
                     val bookList = result.body()!!
-                    Log.d("BookViewModel", "Books retrieved: $bookList")
+                    Log.d("BookViewModel", "Books retrieved: ${bookList.size} books")
 
                     // Update the books list in the state
                     _booksList.value = bookList
+
+                    // Trigger filtering after the data is loaded
+                    filterBooksByYear()
                 } else {
                     Log.e("BookViewModel", "Error: ${result.errorBody()?.string() ?: "Unknown error"}")
                 }
@@ -55,5 +66,26 @@ class BookViewModel @Inject constructor(
                 Log.e("BookViewModel", "Exception occurred: ${e.message}")
             }
         }
+    }
+
+    // Function to set selected year and filter the books list
+    fun onYearSelected(year: Int) {
+        _selectedYear.value = year
+        filterBooksByYear() // Filter the books immediately after year selection
+    }
+
+    // Function to filter books based on the selected year
+    private fun filterBooksByYear() {
+        val year = _selectedYear.value
+        val allBooks = _booksList.value
+
+        // Log the year and books before filtering
+        Log.d("BookViewModel", "Filtering books for year: $year")
+        Log.d("BookViewModel", "Total books available: ${allBooks.size}")
+
+        _filteredBooksList.value = allBooks
+
+        // Log the filtered list size
+        Log.d("BookViewModel", "Books after filtering: ${_filteredBooksList.value.size}")
     }
 }

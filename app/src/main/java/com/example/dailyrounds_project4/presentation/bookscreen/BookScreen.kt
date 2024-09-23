@@ -38,6 +38,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.layout.ContentScale
@@ -61,10 +62,38 @@ fun BookScreen(navController: NavController,
         viewModel.loadBookList(context)
     }
 
-    // Display the list of books
-    LazyColumn {
-        items(booksList) { book ->
-            BookItem(book)
+    val filteredBooksList by viewModel.filteredBooksList
+    val selectedYear by viewModel.selectedYear
+
+    val years = (2018 downTo 2000).toList()
+
+    Log.d("jashwant", "BookScreen: filteredBookList-"+filteredBooksList)
+    Log.d("jashwant", "BookScreen: booksList-"+booksList)
+
+    Column {
+        // Year Filter Bar
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            items(years) { year ->
+                Text(
+                    text = year.toString(),
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .clickable {
+                            viewModel.onYearSelected(year)
+                        },
+                    color = if (year == selectedYear) Color.Blue else Color.Black
+                )
+            }
+        }
+
+        // Display the filtered list of books
+        LazyColumn {
+            items(filteredBooksList) { book ->
+                BookItem(book)
+            }
         }
     }
 }
