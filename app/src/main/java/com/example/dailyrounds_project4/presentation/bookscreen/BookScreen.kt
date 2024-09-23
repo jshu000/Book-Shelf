@@ -80,7 +80,7 @@ fun BookScreen(navController: NavController,
                 Text(
                     text = year.toString(),
                     modifier = Modifier
-                        .padding(8.dp)
+                        .padding(12.dp)
                         .clickable {
                             viewModel.onYearSelected(year)
                         },
@@ -112,7 +112,7 @@ fun BookItem(book: BooksItem) {
             Text(text = book.title, fontWeight = FontWeight.Bold)
             Text(text = "Score: ${book.score}")
             Text(text = "Popularity: ${book.popularity}")
-            Text(text = "Published: ${book.publishedChapterDate}") // Format this as needed
+            Text(text = "Published on: ${book.getPublishedYear()}") // Format this as needed
         }
     }
 }
