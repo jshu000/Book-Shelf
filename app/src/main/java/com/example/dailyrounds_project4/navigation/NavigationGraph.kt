@@ -16,7 +16,7 @@ fun NavigationGraph(
 ) {
     NavHost(
         navController = navController,               //The NavController is the central API for the Navigation component. It is stateful and keeps track of the back stack of composables that make up the screens in your app and the state of each screen.
-        startDestination = Screens.BookScreen.route
+        startDestination = Screens.SignInScreen.route
     ) {
         composable(route = Screens.SignInScreen.route) {
             SignInScreen(navController)

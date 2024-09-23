@@ -55,8 +55,8 @@ fun SignInScreen(
         }
 
 
-    var email by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
+    var email by rememberSaveable { mutableStateOf("ravi@gmail.com") }
+    var password by rememberSaveable { mutableStateOf("ravi12@#") }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val state = viewModel.signInState.collectAsState(initial = null)
@@ -139,31 +139,12 @@ fun SignInScreen(
                     navController.navigate(Screens.SignUpScreen.route)
                 }
         )
-        Text(text = "or connect with", fontWeight = FontWeight.Medium, color = Color.Gray)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 10.dp),
-            horizontalArrangement = Arrangement.Center
+            horizontalArrangement = Arrangement.Center,
         ) {
-            IconButton(onClick = {
-                val gso= GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                    .requestEmail()
-                    .requestIdToken("328155340111-08kooru117hc776qq04mptu8iq8com8i.apps.googleusercontent.com")
-                    .build()
-
-                val googleSingInClient = GoogleSignIn.getClient(context, gso)
-
-                launcher.launch(googleSingInClient.signInIntent)
-
-            }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_google),
-                    contentDescription = "Google Icon",
-                    modifier = Modifier.size(50.dp),
-                    tint = Color.Unspecified
-                )
-            }
             LaunchedEffect(key1 = state.value?.isSuccess) {
                 scope.launch {
                     if (state.value?.isSuccess?.isNotEmpty() == true) {
@@ -179,15 +160,6 @@ fun SignInScreen(
                     if (state.value?.isError?.isNotEmpty() == true) {
                         val error = state.value?.isError
                         Toast.makeText(context, "${error}", Toast.LENGTH_LONG).show()
-                    }
-                }
-            }
-
-            LaunchedEffect(key1 = googleSignInState.success) {
-                scope.launch {
-                    if (googleSignInState.success != null) {
-                        Toast.makeText(context, "Sign In Success", Toast.LENGTH_LONG).show()
-                        navController.navigate(Screens.BookScreen.route)
                     }
                 }
             }
