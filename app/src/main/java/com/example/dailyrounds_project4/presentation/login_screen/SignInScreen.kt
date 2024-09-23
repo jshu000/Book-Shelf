@@ -40,21 +40,6 @@ fun SignInScreen(
     navController: NavController,
     viewModel: SignInViewModel = hiltViewModel()
 ) {
-    val googleSignInState = viewModel.googleState.value
-
-    val launcher =
-        rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {
-            val account = GoogleSignIn.getSignedInAccountFromIntent(it.data)
-            try {
-                val result = account.getResult(ApiException::class.java)
-                val credentials = GoogleAuthProvider.getCredential(result.idToken, null)
-                viewModel.googleSignIn(credentials)
-            } catch (it: ApiException) {
-                print(it)
-            }
-        }
-
-
     var email by rememberSaveable { mutableStateOf("ravi@gmail.com") }
     var password by rememberSaveable { mutableStateOf("ravi12@#") }
     val scope = rememberCoroutineScope()
@@ -164,11 +149,6 @@ fun SignInScreen(
                 }
             }
 
-        }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            if (googleSignInState.loading){
-                CircularProgressIndicator()
-            }
         }
 
 

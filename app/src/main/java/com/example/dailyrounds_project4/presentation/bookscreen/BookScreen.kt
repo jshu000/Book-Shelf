@@ -50,14 +50,13 @@ import com.example.dailyrounds_project4.models.BooksItem
 import com.example.dailyrounds_project4.presentation.login_screen.SignInViewModel
 
 @Composable
-fun BookScreen(navController: NavController,
-               viewModel: BookViewModel = hiltViewModel()
+fun BookScreen(
+    navController: NavController,
+    viewModel: BookViewModel = hiltViewModel()
 ) {
-    // Observe the books list from the ViewModel
     val booksList by viewModel.booksList
-
     val context = LocalContext.current
-    // Refresh the data when the screen is first displayed
+
     LaunchedEffect(Unit) {
         viewModel.loadBookList(context)
     }
@@ -65,10 +64,12 @@ fun BookScreen(navController: NavController,
     val filteredBooksList by viewModel.filteredBooksList
     val selectedYear by viewModel.selectedYear
 
-    val years = (2014 downTo 2000).toList()
+    // Create a set of years based on the filtered books list
+    val publishedYears = booksList.map { it.getPublishedYear() }.toSet()
+    val years = (2022 downTo 2000).filter { it in publishedYears }
 
-    Log.d("jashwant", "BookScreen: filteredBookList-"+filteredBooksList)
-    Log.d("jashwant", "BookScreen: booksList-"+booksList)
+    Log.d("BookScreen", "Filtered Book List: $filteredBooksList")
+    Log.d("BookScreen", "Books List: $booksList")
 
     Column {
         // Year Filter Bar
@@ -83,8 +84,10 @@ fun BookScreen(navController: NavController,
                         .padding(12.dp)
                         .clickable {
                             viewModel.onYearSelected(year)
-                        },
-                    color = if (year == selectedYear) Color.Blue else Color.Black
+                        }
+                        .then(if (year == selectedYear) Modifier.background(Color.LightGray) else Modifier),
+                    color = if (year == selectedYear) Color.Blue else Color.Black,
+                    fontWeight = if (year == selectedYear) FontWeight.Bold else FontWeight.Normal
                 )
             }
         }
