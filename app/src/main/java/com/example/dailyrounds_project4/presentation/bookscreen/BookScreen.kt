@@ -57,8 +57,13 @@ fun BookScreen(
     val booksList by viewModel.booksList
     val context = LocalContext.current
 
+    // This will be used to indicate loading state
+    var isLoading by remember { mutableStateOf(true) }
+
     LaunchedEffect(Unit) {
         viewModel.loadBookList(context)
+        // After loading, we can check the state and set loading to false
+        isLoading = false
     }
 
     val filteredBooksList by viewModel.filteredBooksList
@@ -66,36 +71,55 @@ fun BookScreen(
 
     // Create a set of years based on the filtered books list
     val publishedYears = booksList.map { it.getPublishedYear() }.toSet()
-    val years = (2022 downTo 2000).filter { it in publishedYears }
+    val years = (2014 downTo 2000).filter { it in publishedYears }
 
     Log.d("BookScreen", "Filtered Book List: $filteredBooksList")
     Log.d("BookScreen", "Books List: $booksList")
 
     Column {
-        // Year Filter Bar
-        LazyRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            items(years) { year ->
-                Text(
-                    text = year.toString(),
-                    modifier = Modifier
-                        .padding(12.dp)
-                        .clickable {
-                            viewModel.onYearSelected(year)
-                        }
-                        .then(if (year == selectedYear) Modifier.background(Color.LightGray) else Modifier),
-                    color = if (year == selectedYear) Color.Blue else Color.Black,
-                    fontWeight = if (year == selectedYear) FontWeight.Bold else FontWeight.Normal
-                )
+        // Title
+        Text(
+            text = "Book Shelf",
+            style = MaterialTheme.typography.h5,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 8.dp).align(Alignment.CenterHorizontally)
+        )
+        // Show loading UI if still loading or if the filtered list is empty
+        if (isLoading || filteredBooksList.isEmpty()) {
+            // Display a loading spinner
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .wrapContentSize(Alignment.Center)
+            ) {
+                CircularProgressIndicator()
             }
-        }
+        } else {
+            // Year Filter Bar
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                items(years) { year ->
+                    Text(
+                        text = year.toString(),
+                        modifier = Modifier
+                            .padding(12.dp)
+                            .clickable {
+                                viewModel.onYearSelected(year)
+                            }
+                            .then(if (year == selectedYear) Modifier.background(Color.LightGray) else Modifier),
+                        color = if (year == selectedYear) Color.Blue else Color.Black,
+                        fontWeight = if (year == selectedYear) FontWeight.Bold else FontWeight.Normal
+                    )
+                }
+            }
 
-        // Display the filtered list of books
-        LazyColumn {
-            items(filteredBooksList) { book ->
-                BookItem(book)
+            // Display the filtered list of books
+            LazyColumn {
+                items(filteredBooksList) { book ->
+                    BookItem(book)
+                }
             }
         }
     }
