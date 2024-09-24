@@ -1,3 +1,18 @@
+BookShelf
+
+
+MVVM architecture
+Single activity and uses compose navigation
+Retrofit for Network calls
+Made network call cache using retrofit & database
+Dependency injection is used.(HILT)
+Handled EdgeCases
+Valid username and password
+Invalid user login
+Create user failure
+Filter books based on published timestamp
+
+
 The apk is attached in the project "app-debug.apk".
 This app contains-
 
