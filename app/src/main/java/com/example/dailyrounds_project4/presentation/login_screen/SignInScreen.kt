@@ -40,8 +40,8 @@ fun SignInScreen(
     navController: NavController,
     viewModel: SignInViewModel = hiltViewModel()
 ) {
-    var email by rememberSaveable { mutableStateOf("ravi@gmail.com") }
-    var password by rememberSaveable { mutableStateOf("ravi12@#") }
+    var email by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val state = viewModel.signInState.collectAsState(initial = null)
@@ -54,7 +54,7 @@ fun SignInScreen(
         verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Enter your credential's to register",
+            text = "Enter your credential's",
             fontWeight = FontWeight.Medium,
             fontSize = 15.sp,
             color = Color.Gray,

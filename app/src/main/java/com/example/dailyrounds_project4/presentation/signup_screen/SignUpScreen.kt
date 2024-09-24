@@ -162,14 +162,14 @@ fun SignUpScreen(
         Button(
             onClick = {
                 if (isPasswordValid(password)) {
-                    // Proceed with sign-up logic
-                    // Correct
+                    scope.launch {
+                        viewModel.registerUser(email, password)
+                    }
+
                 } else {
                     passwordError = "Password must be at least 8 characters long, include a number, a special character, a lowercase letter, and an uppercase letter."
                 }
-                scope.launch {
-                    viewModel.registerUser(email, password)
-                }
+
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -201,29 +201,6 @@ fun SignUpScreen(
             text = "Already Have an account? sign In",
             fontWeight = FontWeight.Bold, color = Color.Black, fontFamily = RegularFont
         )
-        Text(
-            modifier = Modifier
-                .padding(
-                    top = 40.dp,
-                ),
-            text = "Or connect with",
-            fontWeight = FontWeight.Medium, color = Color.Gray
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp), horizontalArrangement = Arrangement.Center
-        ) {
-            IconButton(onClick = { /*TODO*/ }) {
-                Icon(
-                    modifier = Modifier.size(50.dp),
-                    painter = painterResource(id = R.drawable.ic_google),
-                    contentDescription = "Google Icon", tint = Color.Unspecified
-                )
-            }
-
-
-        }
     }
 
     LaunchedEffect(key1 = state.value?.isSuccess) {
@@ -231,6 +208,8 @@ fun SignUpScreen(
             if (state.value?.isSuccess?.isNotEmpty() == true) {
                 val success = state.value?.isSuccess
                 Toast.makeText(context, "$success", Toast.LENGTH_LONG).show()
+                navController.navigate(Screens.SignInScreen.route)
+
             }
         }
     }
