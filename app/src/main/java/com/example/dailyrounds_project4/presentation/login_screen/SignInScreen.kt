@@ -54,7 +54,7 @@ fun SignInScreen(
         verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Enter your credential's to register",
+            text = "Enter your credential's",
             fontWeight = FontWeight.Medium,
             fontSize = 15.sp,
             color = Color.Gray,
